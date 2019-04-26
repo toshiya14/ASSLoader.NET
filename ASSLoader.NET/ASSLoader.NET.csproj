@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.0.1</Version>
+    <Authors>Akaishi Toshiya</Authors>
+    <Company>RMEGo Studio</Company>
+    <Description>A ass subtitle toolkit.</Description>
+    <PackageProjectUrl>https://github.com/toshiya14/ASSLoader.NET</PackageProjectUrl>
+     </PropertyGroup>
 
 </Project>
