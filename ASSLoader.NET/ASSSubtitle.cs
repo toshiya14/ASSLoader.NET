@@ -20,6 +20,8 @@ namespace ASSLoader.NET
         public Dictionary<string, ASSEmbeddedFont> Fonts { get; set; }
         public Dictionary<string, ASSEmbeddedGraphics> Graphics { get; set; }
 
+        public Dictionary<string, string> UnknownSections { get; set; }
+
         public void Load(string path, Encoding enc = null)
         {
             string[] lines;
@@ -42,9 +44,11 @@ namespace ASSLoader.NET
             Events = new List<ASSEvent>();
             Fonts = new Dictionary<string, ASSEmbeddedFont>();
             Graphics = new Dictionary<string, ASSEmbeddedGraphics>();
+            UnknownSections = new Dictionary<string, string>();
 
             // Regex defination
             var regexScriptInfoKeyValue = new Regex(@"^(?<key>[0-9a-zA-z ]+)\s*\:\s*(?<value>.+)$");
+            var unknowSectionName = string.Empty;
 
             for (var lineIndex = 0; lineIndex < lines.Length; lineIndex++)
             {
@@ -96,9 +100,7 @@ namespace ASSLoader.NET
                     else
                     {
                         workingSection = ASSSection.Unknown;
-                        //throw new ASSFileFormatException(path, lineIndex, "Unknown section loaded in {LINE "+(lineIndex+1)+":"+line+"}.");
-                        Trace.TraceWarning("LINE " + (lineIndex + 1) + ": Unknown section loaded, this section would be skipped.}.");
-                        Trace.TraceWarning("LINE " + (lineIndex + 1) + ": " + line);
+                        unknowSectionName = line;
                         continue;
                     }
                 }
@@ -107,7 +109,14 @@ namespace ASSLoader.NET
                 {
                     // Skiplines
                     case ASSSection.Unknown:
-                        // Skip them.
+                        if (UnknownSections.ContainsKey(unknowSectionName))
+                        {
+                            UnknownSections[unknowSectionName] += "\n" + line;
+                        }
+                        else
+                        {
+                            UnknownSections[unknowSectionName] = line;
+                        }
                         continue;
 
                     // Loading ScriptInfo section.
@@ -245,22 +254,31 @@ namespace ASSLoader.NET
 
             // Script Info
             sb.AppendLine("[Script Info]");
-            foreach(var si in ScriptInfo)
+            foreach (var si in ScriptInfo)
             {
                 if (si.Value.Item1.Equals("comment"))
                 {
                     sb.AppendLine($";" + si.Value.Item2);
-                }else if (si.Value.Item2.Equals("key-value"))
+                }
+                if (si.Value.Item1.Equals("key-value"))
                 {
                     sb.AppendLine($"{si.Key}: {si.Value.Item2}");
                 }
             }
             sb.AppendLine();
 
+            // Unknown Sections
+            foreach(var us in UnknownSections)
+            {
+                sb.AppendLine(us.Key);
+                sb.AppendLine(us.Value);
+                sb.AppendLine();
+            }
+
             // V4+ Styles
             sb.AppendLine("[V4+ Styles]");
             sb.AppendLine($"Format: {string.Join(", ", V4pStyleFormat)}");
-            foreach(var s in V4pStyles)
+            foreach (var s in V4pStyles)
             {
                 sb.AppendLine(FormatStyle(V4pStyleFormat, s.Value));
             }
@@ -302,8 +320,8 @@ namespace ASSLoader.NET
                 switch (field.Trim())
                 {
                     case "Layer": evt.Layer = Convert.ToInt32(value); continue;
-                    case "Start": evt.Start = value; continue;
-                    case "End": evt.End = value; continue;
+                    case "Start": evt.Start = new ASSEventTime(value); continue;
+                    case "End": evt.End = new ASSEventTime(value); continue;
                     case "Style": evt.Style = value; continue;
                     case "Name": evt.Name = value; continue;
                     case "MarginL": evt.MarginL = Convert.ToInt32(value); continue;
@@ -508,15 +526,15 @@ namespace ASSLoader.NET
         }
     }
 
-    public class ASSEvent
+    public class ASSEvent : ICloneable
     {
         public ASSEventType Type { get; set; }
 
         public int Layer { get; set; }
 
-        public string Start { get; set; }
+        public ASSEventTime Start { get; set; }
 
-        public string End { get; set; }
+        public ASSEventTime End { get; set; }
 
         public string Style { get; set; }
 
@@ -532,6 +550,38 @@ namespace ASSLoader.NET
 
         public string Text { get; set; }
 
+        public object Clone()
+        {
+            var newInst = new ASSEvent();
+            newInst.Type = this.Type;
+            newInst.Layer = this.Layer;
+            newInst.Start = new ASSEventTime(this.Start.ToString());
+            newInst.End = new ASSEventTime(this.End.ToString());
+            newInst.Style = this.Style;
+            newInst.Name = this.Name;
+            newInst.MarginL = this.MarginL;
+            newInst.MarginR = this.MarginR;
+            newInst.MarginV = this.MarginV;
+            newInst.Effect = this.Effect;
+            newInst.Text = this.Text;
+            return newInst;
+        }
+
+        public ASSEvent()
+        {
+            this.Type = ASSEventType.Dialogue;
+            this.Layer = 0;
+            this.Start = new ASSEventTime(0, 0, 0, 0);
+            this.End = new ASSEventTime(0, 0, 0, 0);
+            this.Style = "Default";
+            this.Name = string.Empty;
+            this.MarginL = 0;
+            this.MarginR = 0;
+            this.MarginV = 0;
+            this.Effect = string.Empty;
+            this.Text = string.Empty;
+        }
+
         public override string ToString()
         {
             if (ASSSubtitle.showAbstract)
@@ -542,6 +592,127 @@ namespace ASSLoader.NET
             {
                 base.ToString();
             }
+        }
+    }
+
+    public class ASSEventTime : IComparable
+    {
+        public int Hour { get; set; }
+
+        public int Minute { get; set; }
+
+        public int Second { get; set; }
+
+        public int Millisecond { get; set; }
+
+        public ASSEventTime(string assTime)
+        {
+            var parts = assTime.Split(':', '.');
+            var msIndex = parts.Length - 1;
+            var secIndex = parts.Length - 2;
+            var minIndex = parts.Length - 3;
+            var hourIndex = parts.Length - 4;
+            this.Hour = hourIndex > 0 ? Convert.ToInt32(parts[hourIndex]) : 0;
+            this.Minute = minIndex > 0 ? Convert.ToInt32(parts[minIndex]) : 0;
+            this.Second = secIndex > 0 ? Convert.ToInt32(parts[secIndex]) : 0;
+            this.Millisecond = msIndex > 0 ? Convert.ToInt32((parts[msIndex] + "000").Substring(0, 3)) : 0;
+        }
+
+        public ASSEventTime(int hour, int minute, int second, int millisecond)
+        {
+            this.Hour = hour;
+            this.Minute = minute;
+            this.Second = second;
+            this.Millisecond = millisecond;
+        }
+
+        public long TotalMilliseconds()
+        {
+            return this.Hour * 3600000 + this.Minute * 60000 + this.Second * 1000 + this.Millisecond;
+        }
+
+        public static explicit operator ASSEventTime(TimeSpan ts)
+        {
+            return new ASSEventTime(ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
+        }
+
+        public static explicit operator TimeSpan(ASSEventTime time)
+        {
+            return new TimeSpan(0, time.Hour, time.Minute, time.Second, time.Millisecond);
+        }
+
+        public static ASSEventTime operator +(ASSEventTime aet, double num)
+        {
+            var target = new ASSEventTime(aet.ToString());
+            var ms = Convert.ToInt32(Math.Floor(num * 1000));
+            target.Millisecond = target.Millisecond + ms;
+            if (target.Millisecond > 1000)
+            {
+                target.Second += target.Millisecond / 1000;
+                target.Millisecond = target.Millisecond % 1000;
+            }
+            if (target.Second > 60)
+            {
+                target.Minute += target.Second / 60;
+                target.Second = target.Second % 60;
+            }
+            if(target.Minute > 60)
+            {
+                target.Hour += target.Minute / 60;
+                target.Minute = target.Minute % 60;
+            }
+
+            return target;
+        }
+
+        public static ASSEventTime operator -(ASSEventTime aet, double num)
+        {
+            var ms = Convert.ToInt32(Math.Floor(num * 1000));
+            var target = new ASSEventTime(aet.ToString());
+            target.Millisecond = aet.Millisecond - ms;
+            if (target.Millisecond < 0)
+            {
+                target.Millisecond += 1000;
+                target.Second -= 1;
+            }
+            if (target.Second < 0)
+            {
+                target.Second += 60;
+                target.Minute -= 1;
+            }
+            if (target.Minute < 0)
+            {
+                target.Minute += 60;
+                target.Hour -= 1;
+            }
+            return target;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return CompareTo(obj) == 0;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)this.TotalMilliseconds();
+        }
+        public override string ToString()
+        {
+            return this.Hour.ToString().Substring(0, 1) + ":"
+                   + this.Minute.ToString().PadLeft(2, '0') + ":"
+                   + this.Second.ToString().PadLeft(2, '0') + "."
+                   + this.Millisecond.ToString().PadLeft(3, '0').Substring(0, 2);
+        }
+
+        public int CompareTo(object obj)
+        {
+            var target = obj as ASSEventTime;
+            if (target == null)
+            {
+                target = new ASSEventTime(obj.ToString());
+            }
+            return (int)(this.TotalMilliseconds() - target.TotalMilliseconds());
         }
     }
 
