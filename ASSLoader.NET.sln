@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2050
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29926.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASSLoader.NET", "ASSLoader.NET\ASSLoader.NET.csproj", "{49125788-BCF4-428D-8A62-6D85D0CD96BF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASSLoader.NET.ConsoleDemo", "ASSLoader.NET.ConsoleDemo\ASSLoader.NET.ConsoleDemo.csproj", "{23AE3F91-F8CF-4BD1-92DE-73DC5825F107}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASSLoader.AutoEffects", "ASSLoader.AutoEffects\ASSLoader.AutoEffects.csproj", "{DD283CD7-3D67-42C4-87A7-78A72C33BED5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{23AE3F91-F8CF-4BD1-92DE-73DC5825F107}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23AE3F91-F8CF-4BD1-92DE-73DC5825F107}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23AE3F91-F8CF-4BD1-92DE-73DC5825F107}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD283CD7-3D67-42C4-87A7-78A72C33BED5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD283CD7-3D67-42C4-87A7-78A72C33BED5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD283CD7-3D67-42C4-87A7-78A72C33BED5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD283CD7-3D67-42C4-87A7-78A72C33BED5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

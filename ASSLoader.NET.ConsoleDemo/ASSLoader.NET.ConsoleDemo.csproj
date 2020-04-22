@@ -50,6 +50,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ASSLoader.AutoEffects\ASSLoader.AutoEffects.csproj">
+      <Project>{DD283CD7-3D67-42C4-87A7-78A72C33BED5}</Project>
+      <Name>ASSLoader.AutoEffects</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ASSLoader.NET\ASSLoader.NET.csproj">
       <Project>{49125788-bcf4-428d-8a62-6d85d0cd96bf}</Project>
       <Name>ASSLoader.NET</Name>
