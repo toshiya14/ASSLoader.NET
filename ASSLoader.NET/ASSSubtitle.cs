@@ -174,12 +174,12 @@ namespace ASSLoader.NET
                     case ASSSection.ScriptInfo:
                         if (line.StartsWith("!:"))
                         {
-                            ScriptInfo["Comment" + scriptInfoCommentIndex] = new ASSScriptInfo { Type = ScriptInfoType.Comments, Value = line[2..] };
+                            ScriptInfo["Comment" + scriptInfoCommentIndex] = new ASSScriptInfo { Type = ScriptInfoType.Comments, Value = line.Substring(2) };
                             scriptInfoCommentIndex++;
                         }
                         else if (line.StartsWith(";"))
                         {
-                            ScriptInfo["Comment" + scriptInfoCommentIndex] = new ASSScriptInfo { Type = ScriptInfoType.Comments, Value = line[1..] };
+                            ScriptInfo["Comment" + scriptInfoCommentIndex] = new ASSScriptInfo { Type = ScriptInfoType.Comments, Value = line.Substring(1) };
                             scriptInfoCommentIndex++;
                         }
                         else

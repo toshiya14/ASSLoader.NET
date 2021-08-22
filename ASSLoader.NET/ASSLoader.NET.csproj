@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net45</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.9.3.1-pre</Version>
+    <Version>0.9.3.3-pre</Version>
     <Authors>Akaishi Toshiya</Authors>
     <Company>Shiba Studio</Company>
     <Description>A ass subtitle toolkit.</Description>
