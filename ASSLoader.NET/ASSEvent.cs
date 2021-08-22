@@ -32,6 +32,10 @@ namespace ASSLoader.NET
 
         private static ILog log = LogManager.GetLogger(typeof(ASSStyle));
 
+        public static IList<string> DefaultFormat = new List<string> {
+            "Layer", "Start", "End", "Style", "Name", "MarginL", "MarginR", "MarginV", "Effect", "Text"
+        };
+
         public object Clone()
         {
             var newInst = new ASSEvent();

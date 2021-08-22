@@ -14,6 +14,13 @@ namespace ASSLoader.NET.Enums
 
     }
 
+    public enum ScriptInfoType
+    {
+        Unspecified,
+        Comments,
+        KeyValue
+    }
+
     public enum V4pStyleBorderStyle
     {
         BorderAndShadow = 1,

@@ -7,12 +7,13 @@ A .NET Library for ass subtitle file loading and writing.
 
 * Divide the `ASSSubtitle.cs` into files by classes.
 * Add some document comments.
+* Add `DefaultFormat` for `ASSEvent` and `ASSStyle`.
+* Add `CreateNew()` for `ASSSubtitle` to create new ass file with a default template with `Default` style and empty events.
 * Fixed bugs by @no1d
 
 TODO:
 
 * Complete document comments.
-
 * Full reference document.
 
 v0.9.1 - 2020-05-14
@@ -24,5 +25,5 @@ v0.9.1 - 2020-05-14
 
 # Contributor
 
-<a href="https://github.com/toshiya14"><img src="https://avatars.githubusercontent.com/u/13333533?v=4" title="ngryman" width="80" height="80"></a><a href="https://github.com/ngryman"><img src="https://avatars.githubusercontent.com/u/11740438?v=4" title="ngryman" width="80" height="80"></a>
+<a href="https://github.com/toshiya14"><img src="https://avatars.githubusercontent.com/u/13333533?v=4" title="toshiya14" width="80" height="80"></a>&nbsp;<a href="https://github.com/no1d"><img src="https://avatars.githubusercontent.com/u/11740438?v=4" title="no1d" width="80" height="80"></a>
 

@@ -1,15 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.1;net45</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.9.2</Version>
+    <Version>0.9.3.1-pre</Version>
     <Authors>Akaishi Toshiya</Authors>
     <Company>Shiba Studio</Company>
     <Description>A ass subtitle toolkit.</Description>
     <PackageProjectUrl>https://github.com/toshiya14/ASSLoader.NET</PackageProjectUrl>
     <Copyright>Akaishi Toshiya</Copyright>
-     </PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.12" />

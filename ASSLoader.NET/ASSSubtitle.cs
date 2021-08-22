@@ -10,9 +10,38 @@ using System.Text.RegularExpressions;
 
 namespace ASSLoader.NET
 {
+    public struct ASSScriptInfo
+    {
+        public ScriptInfoType Type;
+        public string Key;
+        public string Value;
+
+        // implicit converted from tuple to keep compatibility with old version.
+        public static implicit operator ASSScriptInfo(Tuple<string, string> tuple)
+        {
+            var si = new ASSScriptInfo();
+            switch (tuple.Item1.ToLower())
+            {
+                case "comment":
+                    si.Type = ScriptInfoType.Comments;
+                    si.Value = tuple.Item2;
+                    break;
+
+                case "key-value":
+                    si.Type = ScriptInfoType.KeyValue;
+                    break;
+
+                default:
+                    si.Type = ScriptInfoType.Unspecified;
+                    break;
+            }
+            si.Value = tuple.Item2;
+            return si;
+        }
+    }
     public class ASSSubtitle
     {
-        public Dictionary<string, Tuple<string, string>> ScriptInfo { get; set; }
+        public Dictionary<string, ASSScriptInfo> ScriptInfo { get; set; }
 
         public IList<string> V4pStyleFormat { get; set; }
 
@@ -57,7 +86,7 @@ namespace ASSLoader.NET
 
             V4pStyleFormat = new List<string>();
             EventFormat = new List<string>();
-            ScriptInfo = new Dictionary<string, Tuple<string, string>>();
+            ScriptInfo = new Dictionary<string, ASSScriptInfo>();
             V4pStyles = new Dictionary<string, ASSStyle>();
             Events = new List<ASSEvent>();
             Fonts = new Dictionary<string, ASSEmbeddedFont>();
@@ -145,12 +174,12 @@ namespace ASSLoader.NET
                     case ASSSection.ScriptInfo:
                         if (line.StartsWith("!:"))
                         {
-                            ScriptInfo["Comment" + scriptInfoCommentIndex] = new Tuple<string, string>("comment", line.Substring(2));
+                            ScriptInfo["Comment" + scriptInfoCommentIndex] = new ASSScriptInfo { Type = ScriptInfoType.Comments, Value = line[2..] };
                             scriptInfoCommentIndex++;
                         }
                         else if (line.StartsWith(";"))
                         {
-                            ScriptInfo["Comment" + scriptInfoCommentIndex] = new Tuple<string, string>("comment", line.Substring(1));
+                            ScriptInfo["Comment" + scriptInfoCommentIndex] = new ASSScriptInfo { Type = ScriptInfoType.Comments, Value = line[1..] };
                             scriptInfoCommentIndex++;
                         }
                         else
@@ -160,7 +189,7 @@ namespace ASSLoader.NET
                             {
                                 var key = match.Groups["key"].Value;
                                 var value = match.Groups["value"].Value;
-                                ScriptInfo[key] = new Tuple<string, string>("key-value", value);
+                                ScriptInfo[key] = new ASSScriptInfo { Type = ScriptInfoType.KeyValue, Key = key, Value = value };
                             }
                             else
                             {
@@ -295,21 +324,22 @@ namespace ASSLoader.NET
 
             // Script Info
             sb.AppendLine("[Script Info]");
-            foreach (var si in ScriptInfo)
+            foreach (var kv in ScriptInfo)
             {
-                if (si.Value.Item1.Equals("comment"))
+                var si = kv.Value;
+                if (si.Type == ScriptInfoType.Comments)
                 {
-                    sb.AppendLine($";{si.Value.Item2}");
+                    sb.AppendLine($";{si.Value}");
                 }
-                if (si.Value.Item1.Equals("key-value"))
+                if (si.Type == ScriptInfoType.KeyValue)
                 {
-                    sb.AppendLine($"{si.Key}: {si.Value.Item2}");
+                    sb.AppendLine($"{si.Key}: {si.Value}");
                 }
             }
             sb.AppendLine();
 
             // Unknown Sections
-            foreach(var us in UnknownSections)
+            foreach (var us in UnknownSections)
             {
                 sb.AppendLine(us.Key);
                 sb.AppendLine(us.Value);
@@ -353,6 +383,52 @@ namespace ASSLoader.NET
             {
                 File.WriteAllText(path, Stringify(), enc);
             }
+        }
+
+        /// <summary>
+        /// Create an ASS subtitle object, with a `Default` style and no event lines.
+        /// The default resolution set to the subtitle would be 1920 x 1080.
+        /// </summary>
+        /// <returns></returns>
+        public static ASSSubtitle CreateNew()
+        {
+            var instance = new ASSSubtitle();
+            instance.V4pStyleFormat = ASSStyle.DefaultFormat;
+            instance.EventFormat = ASSEvent.DefaultFormat;
+            instance.ScriptInfo = new Dictionary<string, ASSScriptInfo>();
+            instance.ScriptInfo.Add("PlayResX", new ASSScriptInfo { Type = ScriptInfoType.KeyValue, Key = "PlayResX", Value = "1920" });
+            instance.ScriptInfo.Add("PlayResY", new ASSScriptInfo { Type = ScriptInfoType.KeyValue, Key = "PlayResY", Value = "1080" });
+            instance.ScriptInfo.Add("YCbCr Matrix", new ASSScriptInfo { Type = ScriptInfoType.KeyValue, Key = "YCbCr Matrix", Value = "TV.709" });
+            instance.V4pStyles = new Dictionary<string, ASSStyle>();
+            instance.V4pStyles.Add("Default", new ASSLoader.NET.ASSStyle
+            {
+                Name = "Default",
+                Fontname = "Arial",
+                Fontsize = 45d,
+                PrimaryColour = "&H00FFFFFF",
+                SecondaryColour = "&H0000FFFF",
+                OutlineColour = "&H000000FF",
+                BackColour = "&H000000FF",
+                Bold = false,
+                Italic = false,
+                Underline = false,
+                StrikeOut = false,
+                ScaleX = 100,
+                ScaleY = 100,
+                Spacing = 0,
+                Angle = 0,
+                BorderStyle = V4pStyleBorderStyle.ColorBackground,
+                Outline = 2,
+                Shadow = 2,
+                Alignment = V4pStyleAlignment.LeftBottom,
+                MarginL = 0,
+                MarginR = 0,
+                MarginV = 0,
+                Encoding = 1
+            });
+            instance.Events = new List<ASSEvent>();
+            instance.UnknownSections = new Dictionary<string, string>();
+            return instance;
         }
     } // class ASSSubtitle
 

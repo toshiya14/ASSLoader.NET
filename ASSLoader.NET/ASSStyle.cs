@@ -60,6 +60,9 @@ namespace ASSLoader.NET
 
         private static ILog log = LogManager.GetLogger(typeof(ASSStyle));
 
+        public static readonly IList<string> DefaultFormat = new List<string> {
+            "Name", "Fontname", "Fontsize", "PrimaryColour", "SecondaryColour", "OutlineColour", "BackColour", "Bold", "Italic", "Underline", "StrikeOut", "ScaleX", "ScaleY", "Spacing", "Angle", "BorderStyle", "Outline", "Shadow", "Alignment", "MarginL", "MarginR", "MarginV", "Encoding"
+        };
 
         /// <summary>
         /// Convert an ASSStle object into a line of style text.
